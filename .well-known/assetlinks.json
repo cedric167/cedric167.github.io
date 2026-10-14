@@ -1,11 +1,14 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "fr.litefoil.tracker",
       "sha256_cert_fingerprints": [
-        "C6:18:FD:95:1D:FB:01:40:F7:DD:E2:67:D6:62:7F:25:B2:42:EE:2B:3F:17:40:2C:02:3E:C1:59:E4:88:4C:DD"
+        "C6:18:FD:95:1D:FB:01:40:F7:DD:E2:67:D6:62:7F:25:B2:42:EE:2B:3F:17:40:2C:02:3E:C1:59:E4:88:4C:DD",
+        "63:F7:C9:FC:2B:28:83:94:00:4A:0B:DC:4E:6F:18:F7:54:24:42:AC:F9:B3:DF:F6:AE:61:88:42:A2:FE:A7:DE"
       ]
     }
   }
