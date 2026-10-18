@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>VESC Web Tool</title>
+  <meta name="description" content="Configuration et télémétrie des contrôleurs VESC par Bluetooth, dans le navigateur.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon.svg" alt="" width="28" height="28">
+      <span>VESC Web Tool</span>
+    </div>
+    <div class="conn">
+      <span id="connStatus" class="status off">Déconnecté</span>
+      <label class="can-target" title="Envoyer les commandes à un VESC du bus CAN">
+        <span>Cible</span>
+        <select id="canTarget"><option value="-1">Local</option></select>
+      </label>
+      <button id="btnDisconnect" class="btn ghost" hidden>Déconnecter</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-page="connect" class="active">Connexion</button>
+    <button data-page="realtime">Temps réel</button>
+    <button data-page="mcconf">Moteur</button>
+    <button data-page="appconf">App</button>
+    <button data-page="wizard">Détection</button>
+    <button data-page="control">Contrôle</button>
+    <button data-page="inputs">Entrées</button>
+    <button data-page="terminal">Terminal</button>
+    <button data-page="firmware">Firmware</button>
+  </nav>
+
+  <main>
+    <!-- Connexion -->
+    <section class="page active" id="page-connect">
+      <div class="card">
+        <h2>Se connecter au VESC</h2>
+        <p class="muted">Allume le VESC, puis choisis son module Bluetooth dans la liste.
+          Fonctionne avec Chrome ou Edge sur Android, Windows, macOS et Linux (pas Safari sur iPhone).</p>
+        <div class="row wrap">
+          <button id="btnBle" class="btn primary">Bluetooth</button>
+          <button id="btnUsb" class="btn">USB</button>
+          <button id="btnDemo" class="btn ghost">Mode démo</button>
+        </div>
+        <p id="bleSupport" class="warn" hidden></p>
+      </div>
+
+      <div class="card" id="infoCard" hidden>
+        <h2>Contrôleur</h2>
+        <dl class="kv" id="fwInfo"></dl>
+        <div class="row wrap">
+          <button id="btnScanCan" class="btn">Scanner le bus CAN</button>
+          <button id="btnReboot" class="btn ghost">Redémarrer le VESC</button>
+        </div>
+        <ul id="canList" class="chips"></ul>
+      </div>
+
+      <div class="card">
+        <h2>À propos</h2>
+        <p class="muted">Réplique web de <a href="https://vesc-project.com/vesc_tool" target="_blank" rel="noopener">VESC Tool</a>
+          (Benjamin Vedder) : même protocole, mêmes définitions de paramètres (firmwares 3.55 à 7.01),
+          fichiers XML de configuration compatibles. Code sous licence GPL-3.0.</p>
+      </div>
+    </section>
+
+    <!-- Temps réel -->
+    <section class="page" id="page-realtime">
+      <div class="toolbar">
+        <button id="btnRtStream" class="btn primary">Démarrer</button>
+        <label>Fréquence
+          <select id="rtRate">
+            <option value="100">10 Hz</option>
+            <option value="200" selected>5 Hz</option>
+            <option value="500">2 Hz</option>
+          </select>
+        </label>
+        <button id="btnRtRecord" class="btn">Enregistrer CSV</button>
+        <button id="btnRtClear" class="btn ghost">Effacer</button>
+      </div>
+      <div id="faultBanner" class="fault" hidden></div>
+      <div class="tiles" id="rtTiles"></div>
+      <div class="card">
+        <div class="row wrap chart-head">
+          <h2>Graphiques</h2>
+          <div class="chips" id="chartSeries"></div>
+        </div>
+        <canvas id="rtChart" height="260"></canvas>
+      </div>
+    </section>
+
+    <!-- Configuration moteur / app : construites par app.js -->
+    <section class="page config-page" id="page-mcconf" data-kind="mcconf"></section>
+    <section class="page config-page" id="page-appconf" data-kind="appconf"></section>
+
+    <!-- Assistant de détection FOC -->
+    <section class="page" id="page-wizard">
+      <div class="card">
+        <h2>Détection FOC automatique</h2>
+        <p class="warn">Le moteur va tourner. Retire l'hélice ou la roue, ou bloque la planche, et garde une main sur l'interrupteur.</p>
+        <label class="field">Type de moteur
+          <select id="wizMotor"></select>
+        </label>
+        <div class="grid2">
+          <label class="field">Pertes max (W)<input id="wizLoss" type="number" step="1"></label>
+          <label class="field">Openloop ERPM<input id="wizOl" type="number" step="50"></label>
+          <label class="field">Sensorless ERPM<input id="wizSl" type="number" step="100"></label>
+          <label class="field">Courant batterie max (A, 0 = défaut)<input id="wizImax" type="number" step="5" value="0"></label>
+          <label class="field">Courant batterie régen (A, 0 = défaut)<input id="wizImin" type="number" step="5" value="0"></label>
+        </div>
+        <label class="check"><input type="checkbox" id="wizCan"> Détecter aussi les VESC du bus CAN</label>
+        <div class="row wrap">
+          <button id="btnDetect" class="btn primary">Lancer la détection</button>
+          <button id="btnDetectRL" class="btn">Mesurer R et L seulement</button>
+        </div>
+        <pre id="wizResult" class="result" hidden></pre>
+      </div>
+    </section>
+
+    <!-- Contrôle moteur -->
+    <section class="page" id="page-control">
+      <div class="card">
+        <h2>Contrôle moteur</h2>
+        <p class="warn">Les commandes ne sont envoyées que tant que tu maintiens le bouton appuyé. Relâcher coupe le moteur.</p>
+        <div class="ctl" data-mode="duty">
+          <label>Rapport cyclique <output>0.10</output></label>
+          <input type="range" min="-0.95" max="0.95" step="0.01" value="0.10">
+          <button class="btn hold">Maintenir</button>
+        </div>
+        <div class="ctl" data-mode="current">
+          <label>Courant (A) <output>5</output></label>
+          <input type="range" min="-60" max="60" step="0.5" value="5">
+          <button class="btn hold">Maintenir</button>
+        </div>
+        <div class="ctl" data-mode="brake">
+          <label>Frein (A) <output>5</output></label>
+          <input type="range" min="0" max="60" step="0.5" value="5">
+          <button class="btn hold">Maintenir</button>
+        </div>
+        <div class="ctl" data-mode="rpm">
+          <label>Vitesse (ERPM) <output>3000</output></label>
+          <input type="range" min="-50000" max="50000" step="100" value="3000">
+          <button class="btn hold">Maintenir</button>
+        </div>
+        <div class="ctl" data-mode="handbrake">
+          <label>Frein à main (A) <output>3</output></label>
+          <input type="range" min="0" max="30" step="0.5" value="3">
+          <button class="btn hold">Maintenir</button>
+        </div>
+        <button id="btnStop" class="btn danger big">STOP</button>
+        <dl class="kv" id="ctlLive"></dl>
+      </div>
+    </section>
+
+    <!-- Entrées : PPM, ADC, IMU -->
+    <section class="page" id="page-inputs">
+      <div class="toolbar">
+        <button id="btnInStream" class="btn primary">Démarrer</button>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>PPM</h2><dl class="kv" id="inPpm"></dl></div>
+        <div class="card"><h2>ADC</h2><dl class="kv" id="inAdc"></dl></div>
+        <div class="card"><h2>IMU</h2><dl class="kv" id="inImu"></dl></div>
+      </div>
+    </section>
+
+    <!-- Terminal -->
+    <section class="page" id="page-terminal">
+      <div class="card term">
+        <div class="row wrap">
+          <button class="btn ghost small" data-cmd="help">help</button>
+          <button class="btn ghost small" data-cmd="faults">faults</button>
+          <button class="btn ghost small" data-cmd="hw_status">hw_status</button>
+          <button class="btn ghost small" data-cmd="uptime">uptime</button>
+          <button class="btn ghost small" data-cmd="foc_state">foc_state</button>
+          <button class="btn ghost small" id="btnTermClear">Effacer</button>
+        </div>
+        <pre id="termOut"></pre>
+        <form id="termForm" class="row">
+          <input id="termIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Commande…">
+          <button class="btn primary">Envoyer</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Firmware -->
+    <section class="page" id="page-firmware">
+      <div class="card">
+        <h2>Mise à jour du firmware</h2>
+        <p class="warn">Un mauvais firmware peut rendre le contrôleur inutilisable. Vérifie que le fichier correspond
+          exactement à ton matériel (<span id="fwHwName">?</span>). Ne coupe pas l'alimentation pendant l'envoi.
+          Par Bluetooth, l'envoi prend plusieurs minutes.</p>
+        <label class="field">Fichier firmware (.bin)<input type="file" id="fwFile" accept=".bin"></label>
+        <label class="check"><input type="checkbox" id="fwAllCan"> Envoyer à tous les VESC du bus CAN</label>
+        <div class="row wrap">
+          <button id="btnFwUpload" class="btn primary" disabled>Envoyer</button>
+          <button id="btnFwCancel" class="btn ghost" hidden>Annuler</button>
+        </div>
+        <div class="progress" hidden><div></div></div>
+        <p id="fwStatus" class="muted"></p>
+        <p class="muted">Les firmwares officiels se trouvent dans VESC Tool ou sur
+          <a href="https://github.com/vedderb/vesc_fw_archive" target="_blank" rel="noopener">vesc_fw_archive</a>.
+          Les fichiers compressés (heatshrink) ne sont pas encore pris en charge.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+  <dialog id="helpDialog">
+    <h3 id="helpTitle"></h3>
+    <div id="helpBody"></div>
+    <form method="dialog"><button class="btn">Fermer</button></form>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
