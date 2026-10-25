@@ -40,6 +40,7 @@ Claude ne commande jamais un servo directement : il appelle des outils (`bouger_
 |---|---|
 | [`docs/feuille-de-route.md`](docs/feuille-de-route.md) | Les étapes de construction, dans l'ordre |
 | [`docs/materiel.md`](docs/materiel.md) | Liste d'achats complète : ordinateur, Starlink, budget |
+| [`docs/stl.md`](docs/stl.md) | Pièces à imprimer, partie par partie, avec les pages officielles |
 | [`docs/impression.md`](docs/impression.md) | Plan d'impression sur les 3 Creality K1 Max |
 | [`docs/cablage.md`](docs/cablage.md) | Alimentation, cartes, numéro de canal de chaque servo |
 | [`docs/securite.md`](docs/securite.md) | Règles de sécurité (à lire avant le premier mouvement) |

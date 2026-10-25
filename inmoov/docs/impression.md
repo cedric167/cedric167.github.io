@@ -1,6 +1,6 @@
 # Impression sur 3 Creality K1 Max
 
-Les fichiers STL officiels sont gratuits sur [inmoov.fr](https://inmoov.fr) (rubrique *Build yourself*), partie par partie, avec la notice de montage de chaque partie.
+Les fichiers STL officiels sont gratuits sur [inmoov.fr](https://inmoov.fr) (rubrique *Build yourself*), partie par partie, avec la notice de montage de chaque partie. La liste des pièces à imprimer, dans l'ordre, est dans [`stl.md`](stl.md).
 
 ## Pourquoi les K1 Max conviennent bien
 
