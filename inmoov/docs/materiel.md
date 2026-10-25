@@ -105,6 +105,24 @@ Prévoir 2 ou 3 MG996R de rechange : ce sont ceux qu'on casse en calibrant.
 | Clé API Claude (console.anthropic.com) | paiement à l'usage : chaque échange coûte quelques centimes au plus, à suivre dans la console |
 | Starlink | abonnement existant |
 
+## 11. Base mobile sur hoverboard (étape 5, plus tard)
+
+À acheter seulement quand le robot complet tient sur son socle fixe (voir `feuille-de-route.md`, étape 5).
+
+| Qté | Composant | Rôle | Prix |
+|---|---|---|---|
+| 1 | Hoverboard d'occasion, roues 6,5 pouces, avec sa carte mère, sa batterie 36 V et son chargeur | moteurs, batterie, carte de commande | 50-120 € |
+| 1 | Programmateur ST-Link V2 | reprogrammer la carte avec hoverboard-firmware-hack-FOC | 5-15 € |
+| 1 | Adaptateur USB-série 3,3 V (CP2102 ou FTDI ; surtout pas en 5 V) | liaison portable ↔ carte du hoverboard | 5-10 € |
+| 1 | Châssis : profilé alu 20×20 ou contreplaqué 18 mm, équerres, visserie | porte le robot, la batterie et le portable | 40-80 € |
+| 2 | Roulette folle pivotante Ø 50-75 mm, charge 50 kg ou plus | stabilité avant/arrière | 2 × 8-15 € |
+| 4 | Capteur à ultrasons HC-SR04 (ou 1 lidar 360° type RPLIDAR A1, environ 100 €) | détection des obstacles | 10 € |
+| 1 | Arduino Nano | lit les capteurs et arrête les roues en local | 5-20 € |
+| 1 | Bouton coup de poing d'arrêt d'urgence + relais ou interrupteur de puissance 36 V / 30 A | coupe le courant des moteurs | 25-40 € |
+| 1 | Porte-fusible + fusible 30 A, connecteurs XT60 | protection de la batterie | 10-15 € |
+
+La batterie lithium d'un hoverboard est puissante : n'en prendre que si elle est intacte (pas gonflée, pas cabossée), la recharger avec son chargeur d'origine, sous surveillance, et la garder bien protégée dans le châssis.
+
 ## Budget total indicatif
 
 | Poste | Estimation |
@@ -116,7 +134,9 @@ Prévoir 2 ou 3 MG996R de rechange : ce sont ceux qu'on casse en calibrant.
 | Vision et voix | 45-85 € |
 | Mécanique, quincaillerie, socle | 150-200 € |
 | Filament | 230-310 € |
-| **Total (outillage non compris)** | **environ 1 600 à 2 250 €** |
+| **Total robot fixe (outillage non compris)** | **environ 1 600 à 2 250 €** |
+| Base mobile hoverboard (étape 5) | 165-340 € avec ultrasons (environ 90 € de plus avec un lidar) |
+| **Total avec base mobile** | **environ 1 750 à 2 600 €** |
 
 ## Par où commencer les achats
 
