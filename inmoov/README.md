@@ -2,6 +2,8 @@
 
 Construction d'un robot humanoïde [InMoov](https://inmoov.fr) complet (tête, yeux, mains, bras, torse), avec un ordinateur portable embarqué et Claude comme cerveau : il voit par la caméra de son œil, écoute, parle, se souvient et commande lui-même ses mouvements.
 
+Plus tard (voir la feuille de route) : une tablette Android sur le torse pour que les clients passent des appels WhatsApp en visio ou en audio, une base mobile sur hoverboard, puis la navigation autonome : le robot vient seul quand on l'appelle.
+
 ## Comment ça marche
 
 ```
