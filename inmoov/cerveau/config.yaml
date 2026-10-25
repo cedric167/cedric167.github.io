@@ -1,0 +1,72 @@
+# Configuration du robot InMoov piloté par Claude.
+#
+# Chaque articulation correspond à un servo branché sur une carte PCA9685.
+#   canal  : numéro global du servo (carte 0x40 = canaux 0-15, carte 0x41 = canaux 16-31)
+#   min/max: butées en degrés (angle du servo, 0-180). À CALIBRER servo par servo
+#            avant le premier mouvement : un servo qui force casse les pièces imprimées.
+#   repos  : position de repos (robot détendu, bras le long du corps)
+#   inverse: true si le servo est monté à l'envers (90 + x devient 90 - x)
+#
+# Les valeurs ci-dessous sont des points de départ prudents, pas des valeurs calibrées.
+
+materiel:
+  port_serie: auto          # "auto", ou par ex. "COM3" (Windows) / "/dev/ttyACM0" (Linux)
+  vitesse_serie: 115200
+  camera: 0                 # index de la caméra de l'œil (0 = première caméra USB)
+  camera_largeur: 640
+  camera_hauteur: 480
+
+ia:
+  modele: claude-opus-5-5
+  # "low" répond plus vite, ce qui compte pour un robot qui parle.
+  # Monter à "medium" ou "high" pour des tâches plus réfléchies.
+  effort: low
+  max_tokens: 16000
+  # Au-delà de ce nombre d'échanges, la conversation repart de zéro
+  # (le robot garde ses notes de mémoire, voir memoire.json).
+  echanges_max: 40
+
+voix:
+  langue: fr-FR
+  vitesse_parole: 170
+
+suivi_visage:
+  gain_horizontal: 0.04     # degrés de tête par pixel d'écart
+  gain_vertical: 0.03
+  zone_morte: 30            # pixels : en dessous, la tête ne bouge pas
+
+articulations:
+  # --- Tête (carte 0x40) ---
+  tete_rotation:      {canal: 0,  min: 30, max: 150, repos: 90}
+  cou:                {canal: 1,  min: 50, max: 130, repos: 90}
+  machoire:           {canal: 2,  min: 10, max: 30,  repos: 10}
+  yeux_horizontal:    {canal: 3,  min: 60, max: 120, repos: 90}
+  yeux_vertical:      {canal: 4,  min: 60, max: 120, repos: 90}
+
+  # --- Bras et main droits (carte 0x40) ---
+  droit_omoplate:     {canal: 5,  min: 10, max: 70,  repos: 10}
+  droit_epaule:       {canal: 6,  min: 30, max: 150, repos: 30}
+  droit_rotation:     {canal: 7,  min: 40, max: 140, repos: 90}
+  droit_biceps:       {canal: 8,  min: 5,  max: 85,  repos: 5}
+  droit_poignet:      {canal: 9,  min: 0,  max: 180, repos: 90}
+  droit_pouce:        {canal: 10, min: 0,  max: 180, repos: 0}
+  droit_index:        {canal: 11, min: 0,  max: 180, repos: 0}
+  droit_majeur:       {canal: 12, min: 0,  max: 180, repos: 0}
+  droit_annulaire:    {canal: 13, min: 0,  max: 180, repos: 0}
+  droit_auriculaire:  {canal: 14, min: 0,  max: 180, repos: 0}
+
+  # --- Bras et main gauches (carte 0x41) ---
+  gauche_omoplate:    {canal: 16, min: 10, max: 70,  repos: 10, inverse: true}
+  gauche_epaule:      {canal: 17, min: 30, max: 150, repos: 30, inverse: true}
+  gauche_rotation:    {canal: 18, min: 40, max: 140, repos: 90, inverse: true}
+  gauche_biceps:      {canal: 19, min: 5,  max: 85,  repos: 5,  inverse: true}
+  gauche_poignet:     {canal: 20, min: 0,  max: 180, repos: 90}
+  gauche_pouce:       {canal: 21, min: 0,  max: 180, repos: 0}
+  gauche_index:       {canal: 22, min: 0,  max: 180, repos: 0}
+  gauche_majeur:      {canal: 23, min: 0,  max: 180, repos: 0}
+  gauche_annulaire:   {canal: 24, min: 0,  max: 180, repos: 0}
+  gauche_auriculaire: {canal: 25, min: 0,  max: 180, repos: 0}
+
+  # --- Torse (carte 0x41) ---
+  torse_haut:         {canal: 26, min: 70, max: 110, repos: 90}
+  torse_milieu:       {canal: 27, min: 70, max: 110, repos: 90}

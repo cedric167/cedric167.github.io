@@ -1,0 +1,12 @@
+anthropic>=2.3
+pyyaml
+pyserial
+opencv-python
+numpy
+python-dotenv
+# Voix (inutile en mode --texte)
+SpeechRecognition
+pyaudio
+pyttsx3
+# Tests
+pytest
