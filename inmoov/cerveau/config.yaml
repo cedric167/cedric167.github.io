@@ -30,10 +30,19 @@ voix:
   langue: fr-FR
   vitesse_parole: 170
 
+# Suivi du regard : les yeux suivent le visage tout de suite, la tête et le cou
+# les rattrapent plus lentement. Convention à respecter en calibrant : pour les
+# yeux comme pour la tête, un angle plus grand = regard vers la gauche du robot
+# (horizontal) et vers le haut (vertical). Si un servo tourne dans l'autre sens,
+# mettre "inverse: true" sur son articulation plutôt que de changer les gains.
 suivi_visage:
-  gain_horizontal: 0.04     # degrés de tête par pixel d'écart
-  gain_vertical: 0.03
-  zone_morte: 30            # pixels : en dessous, la tête ne bouge pas
+  gain_yeux_horizontal: 6   # degrés d'œil par pas, quand le visage est au bord de l'image
+  gain_yeux_vertical: 5
+  zone_morte: 0.08          # écart (0 = centre, 1 = bord) sous lequel les yeux ne bougent pas
+  gain_tete: 0.12           # part du décalage des yeux reprise par la tête à chaque pas
+  gain_cou: 0.10
+  tolerance_yeux: 4         # degrés : si les yeux sont presque au milieu, la tête ne bouge pas
+  delai_perte: 3            # secondes sans visage avant que les yeux reviennent au milieu
 
 articulations:
   # --- Tête (carte 0x40) ---

@@ -28,7 +28,9 @@ Pour agir, utilise tes outils :
 - faire_geste pour les gestes courants (saluer, hocher la tête, tendre la main...).
 - bouger_articulations pour un mouvement précis. Les angles sont en degrés et chaque
   articulation a des butées : un angle hors limites est ramené à la butée.
-- suivi_visage pour suivre du regard la personne en face de toi.
+- suivi_visage pour suivre du regard la personne en face de toi : tes yeux la suivent
+  tout de suite, ta tête et ton cou suivent ensuite. Active-le dès que tu parles à quelqu'un.
+- regarder pour tourner la tête et le cou dans une direction (cela arrête le suivi du visage).
 - noter_souvenir pour retenir une information utile d'une conversation à l'autre
   (prénom d'une personne, préférence...).
 
@@ -99,6 +101,20 @@ def _outils(noms_articulations: list) -> list:
                 "type": "object",
                 "properties": {"actif": {"type": "boolean"}},
                 "required": ["actif"],
+                "additionalProperties": False,
+            },
+        },
+        {
+            "name": "regarder",
+            "description": "Tourne la tête et le cou dans une direction et remet les yeux au milieu. "
+                           "horizontal : -1 = tout à ta gauche, 0 = devant, +1 = tout à ta droite. "
+                           "vertical : -1 = en bas, 0 = droit devant, +1 = en haut. "
+                           "Désactive le suivi du visage.",
+            "strict": True,
+            "input_schema": {
+                "type": "object",
+                "properties": {"horizontal": {"type": "number"}, "vertical": {"type": "number"}},
+                "required": ["horizontal", "vertical"],
                 "additionalProperties": False,
             },
         },
@@ -248,6 +264,19 @@ class Cerveau:
             self.vision.suivi_actif = entree["actif"]
             return "Suivi du visage activé." if entree["actif"] else "Suivi du visage désactivé."
 
+        if nom == "regarder":
+            if self.vision:
+                self.vision.suivi_actif = False
+            # Dans config.yaml, un angle plus grand veut dire vers la gauche et vers le haut.
+            cibles = {
+                "tete_rotation": self._angle_direction("tete_rotation", -entree["horizontal"]),
+                "cou": self._angle_direction("cou", entree["vertical"]),
+                "yeux_horizontal": self.corps.articulations["yeux_horizontal"].repos,
+                "yeux_vertical": self.corps.articulations["yeux_vertical"].repos,
+            }
+            atteints = self.corps.bouger_plusieurs(cibles, vitesse=60)
+            return json.dumps({"angles_atteints": atteints}, ensure_ascii=False)
+
         if nom == "etat_du_corps":
             return json.dumps(self.corps.etat(), ensure_ascii=False)
 
@@ -258,6 +287,12 @@ class Cerveau:
             return "Souvenir enregistré."
 
         raise ValueError(f"Outil inconnu : {nom}")
+
+    def _angle_direction(self, nom: str, valeur: float) -> float:
+        """Convertit une direction de -1 à +1 en angle, entre les butées de l'articulation."""
+        a = self.corps.articulations[nom]
+        valeur = max(-1.0, min(1.0, valeur))
+        return a.repos + valeur * ((a.max - a.repos) if valeur > 0 else (a.repos - a.min))
 
     @staticmethod
     def _lire_souvenirs() -> list:

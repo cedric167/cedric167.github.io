@@ -118,3 +118,79 @@ def test_schemas_outils_stricts(cerveau):
     for outil in cerveau.outils:
         assert outil["strict"] is True
         assert outil["input_schema"]["additionalProperties"] is False
+
+
+class FausseCamera:
+    def __init__(self, *_):
+        pass
+
+    def set(self, *_):
+        pass
+
+    def isOpened(self):
+        return False
+
+    def release(self):
+        pass
+
+
+@pytest.fixture
+def vision(corps, monkeypatch):
+    from inmoov import vision as module_vision
+    monkeypatch.setattr(module_vision.cv2, "VideoCapture", FausseCamera)
+    return module_vision.Vision(CONFIG, corps)
+
+
+def test_regard_suit_un_visage(vision, corps):
+    """Visage à 20° sur la droite : les yeux réagissent, puis la tête les rattrape."""
+    art = corps.articulations
+    visage_h, visage_v = -20, 10  # en degrés : droite négative, haut positif
+    demi_champ = 30               # demi-angle de vue de la caméra
+
+    def ecarts():
+        regard_h = (corps.positions["yeux_horizontal"] - art["yeux_horizontal"].repos
+                    + corps.positions["tete_rotation"] - art["tete_rotation"].repos)
+        regard_v = (corps.positions["yeux_vertical"] - art["yeux_vertical"].repos
+                    + corps.positions["cou"] - art["cou"].repos)
+        # Dans l'image, x va vers la droite du robot et y vers le bas.
+        return (max(-1, min(1, (regard_h - visage_h) / demi_champ)),
+                max(-1, min(1, (regard_v - visage_v) / demi_champ)))
+
+    vision.suivi_actif = True
+    vision.suivre(*ecarts())
+    assert corps.positions["yeux_horizontal"] < art["yeux_horizontal"].repos  # les yeux partent à droite
+    assert corps.positions["yeux_vertical"] > art["yeux_vertical"].repos      # et vers le haut
+
+    for _ in range(300):
+        vision.suivre(*ecarts())
+    ecart_x, ecart_y = ecarts()
+    assert abs(ecart_x) <= CONFIG["suivi_visage"]["zone_morte"]
+    assert abs(ecart_y) <= CONFIG["suivi_visage"]["zone_morte"]
+    # La tête a fait l'essentiel du chemin, les yeux sont revenus près du milieu.
+    assert corps.positions["tete_rotation"] < art["tete_rotation"].repos - 10
+    assert corps.positions["cou"] > art["cou"].repos + 3
+    tolerance = CONFIG["suivi_visage"]["tolerance_yeux"] + 3
+    assert abs(corps.positions["yeux_horizontal"] - art["yeux_horizontal"].repos) <= tolerance
+    assert abs(corps.positions["yeux_vertical"] - art["yeux_vertical"].repos) <= tolerance
+
+
+def test_regard_visage_centre_ne_bouge_pas(vision, corps):
+    avant = dict(corps.positions)
+    vision.suivre(0.02, -0.03)
+    assert corps.positions == avant
+
+
+def test_regard_arret_urgence_coupe_le_suivi(vision, corps, monkeypatch):
+    monkeypatch.setattr(corps, "_envoyer", lambda commande: "ESTOP")
+    vision.suivi_actif = True
+    vision.suivre(0.5, 0.5)
+    assert vision.suivi_actif is False
+
+
+def test_outil_regarder(cerveau):
+    art = cerveau.corps.articulations
+    resultat = cerveau._executer(bloc_outil("regarder", {"horizontal": 1, "vertical": -1}))
+    angles = json.loads(resultat["content"])["angles_atteints"]
+    assert angles["tete_rotation"] == art["tete_rotation"].min  # tout à droite
+    assert angles["cou"] == art["cou"].min                      # en bas
+    assert angles["yeux_horizontal"] == art["yeux_horizontal"].repos

@@ -1,7 +1,7 @@
 anthropic>=2.3
 pyyaml
 pyserial
-opencv-python
+opencv-python>=4.8,<5   # OpenCV 5 a retiré le détecteur de visages Haar utilisé par vision.py
 numpy
 python-dotenv
 # Voix (inutile en mode --texte)

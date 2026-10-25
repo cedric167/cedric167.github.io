@@ -27,6 +27,7 @@ class Vision:
         self.suivi_actif = False
         self._image = None
         self._visages = []
+        self._dernier_visage = 0.0
         self._verrou = threading.Lock()
         self._en_marche = self.disponible
         if self.disponible:
@@ -43,26 +44,52 @@ class Vision:
             with self._verrou:
                 self._image = image
                 self._visages = [tuple(int(v) for v in visage) for visage in visages]
-            if self.suivi_actif and len(visages):
-                self._suivre(image, max(visages, key=lambda v: v[2] * v[3]))
+            if self.suivi_actif:
+                if len(visages):
+                    hauteur, largeur = image.shape[:2]
+                    x, y, l, h = max(visages, key=lambda v: v[2] * v[3])
+                    # Écart du visage par rapport au centre de l'image, de -1 à +1.
+                    self.suivre(((x + l / 2) - largeur / 2) / (largeur / 2),
+                                ((y + h / 2) - hauteur / 2) / (hauteur / 2))
+                elif time.monotonic() - self._dernier_visage > self.reglages["delai_perte"]:
+                    self._recentrer_yeux()
             time.sleep(1 / 15)
 
-    def _suivre(self, image, visage):
-        """Tourne la tête pour garder le plus grand visage au centre de l'image."""
-        hauteur, largeur = image.shape[:2]
-        x, y, l, h = visage
-        ecart_x = (x + l / 2) - largeur / 2
-        ecart_y = (y + h / 2) - hauteur / 2
-        zone_morte = self.reglages["zone_morte"]
+    def suivre(self, ecart_x: float, ecart_y: float):
+        """Un pas de suivi du regard, appelé à chaque image où un visage est vu.
+
+        Comme chez un humain, les yeux réagissent tout de suite pour garder le
+        visage au centre de l'image (la caméra est dans l'œil). La tête et le
+        cou suivent plus lentement, dans la direction où les yeux sont tournés :
+        en tournant, ils ramènent peu à peu les yeux vers le milieu.
+        """
+        self._dernier_visage = time.monotonic()
+        r = self.reglages
+        pos = self.corps.positions
         try:
-            if abs(ecart_x) > zone_morte:
-                cible = self.corps.positions["tete_rotation"] - ecart_x * self.reglages["gain_horizontal"]
-                self.corps.bouger("tete_rotation", cible, vitesse=120)
-            if abs(ecart_y) > zone_morte:
-                cible = self.corps.positions["cou"] - ecart_y * self.reglages["gain_vertical"]
-                self.corps.bouger("cou", cible, vitesse=120)
+            if abs(ecart_x) > r["zone_morte"]:
+                self.corps.bouger("yeux_horizontal", pos["yeux_horizontal"] - ecart_x * r["gain_yeux_horizontal"], vitesse=200)
+            if abs(ecart_y) > r["zone_morte"]:
+                self.corps.bouger("yeux_vertical", pos["yeux_vertical"] - ecart_y * r["gain_yeux_vertical"], vitesse=200)
+
+            decalage_h = pos["yeux_horizontal"] - self.corps.articulations["yeux_horizontal"].repos
+            if abs(decalage_h) > r["tolerance_yeux"]:
+                self.corps.bouger("tete_rotation", pos["tete_rotation"] + decalage_h * r["gain_tete"], vitesse=60)
+            decalage_v = pos["yeux_vertical"] - self.corps.articulations["yeux_vertical"].repos
+            if abs(decalage_v) > r["tolerance_yeux"]:
+                self.corps.bouger("cou", pos["cou"] + decalage_v * r["gain_cou"], vitesse=40)
         except Exception:
             # Arrêt d'urgence ou souci série : le réflexe s'arrête, Claude sera prévenu au prochain mouvement.
+            self.suivi_actif = False
+
+    def _recentrer_yeux(self):
+        """Plus de visage depuis un moment : les yeux reviennent doucement au milieu."""
+        try:
+            for nom in ("yeux_horizontal", "yeux_vertical"):
+                repos = self.corps.articulations[nom].repos
+                if self.corps.positions[nom] != repos:
+                    self.corps.bouger(nom, repos, vitesse=40)
+        except Exception:
             self.suivi_actif = False
 
     def visages(self) -> list:

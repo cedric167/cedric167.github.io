@@ -23,7 +23,9 @@ Chaque étape donne un robot qui fonctionne déjà un peu mieux que la précéde
 - [ ] Imprimer et monter la tête, le cou, la mâchoire, le mécanisme des yeux
 - [ ] Caméra USB dans l'œil (régler `camera:` dans `config.yaml`)
 - [ ] Calibrer `tete_rotation`, `cou`, `machoire`, `yeux_*`
-- [ ] Régler le suivi de visage : si la tête part dans le mauvais sens, inverser le signe de `gain_horizontal` ou `gain_vertical`
+- [ ] Calibrer le sens des servos : pour les yeux comme pour la tête et le cou, un angle plus grand doit tourner le regard vers la gauche du robot et vers le haut. Sinon, mettre `inverse: true` sur l'articulation dans `config.yaml`.
+- [ ] Régler le suivi du regard (`suivi_visage` dans `config.yaml`) : les yeux suivent le visage tout de suite, puis la tête et le cou les rattrapent. Si les yeux tremblent, baisser `gain_yeux_*` ; si la tête suit trop lentement, monter `gain_tete` / `gain_cou`.
+- [ ] Demander « regarde-moi » (suivi du visage) et « regarde à gauche » (outil `regarder`)
 - [ ] Micro + haut-parleur : `python main.py` (la mâchoire bouge quand il parle)
 
 ## Étape 3 : bras droit complet
