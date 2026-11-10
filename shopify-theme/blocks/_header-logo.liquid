@@ -60,8 +60,8 @@
     class="header-logo__image-container header-logo__image-container--original"
     data-testid="header-logo"
   >
-    {%- comment -%} 10/11 (demande de Cédric) : sur iPhone, le logo du menu gardait un carré gris (transparence perdue, en AVIF comme en PNG). Le logo est maintenant un dessin SVG (snippets/lf-logo-svg.liquid), ailes seules, même taille et même cadrage qu'avant (83 × 41). {%- endcomment -%}
-    {% render 'lf-logo-svg', class: 'lf-hdr-logo', id: 'hdr', wings_only: true, crop: true, width: 83, height: 41 %}
+    {%- comment -%} 10/11 (demande de Cédric) : sur iPhone, le logo du menu gardait un carré gris (transparence perdue, en AVIF comme en PNG). Le logo est maintenant un dessin SVG (snippets/lf-logo-svg.liquid), ailes seules, même cadrage qu'avant ; taille réduite de 20 % (66 × 33 au lieu de 83 × 41). {%- endcomment -%}
+    {% render 'lf-logo-svg', class: 'lf-hdr-logo', id: 'hdr', wings_only: true, crop: true, width: 66, height: 33 %}
   </span>
 
   {% if use_inverse_logo %}
