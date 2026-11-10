@@ -62,6 +62,8 @@
   >
     {%- comment -%} 10/11 (demande de Cédric) : sur iPhone, le logo du menu gardait un carré gris (transparence perdue, en AVIF comme en PNG). Le logo est maintenant un dessin SVG (snippets/lf-logo-svg.liquid), ailes seules, même cadrage qu'avant ; taille réduite de 20 % (66 × 33 au lieu de 83 × 41). {%- endcomment -%}
     {% render 'lf-logo-svg', class: 'lf-hdr-logo', id: 'hdr', wings_only: true, crop: true, width: 66, height: 33 %}
+    {%- comment -%} 10/11 (demande de Cédric), téléphone seulement : logo du menu descendu de 1 cm (décalage visuel, la hauteur du menu ne change pas). {%- endcomment -%}
+    <style>@media (max-width:749px){#header-component .lf-hdr-logo{position:relative;top:1cm}}</style>
   </span>
 
   {% if use_inverse_logo %}
