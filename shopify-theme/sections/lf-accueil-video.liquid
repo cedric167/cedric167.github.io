@@ -2,7 +2,7 @@
 {%- comment -%} 09/11 (demande de Cédric) : tous les textes sur la vidéo en blanc (menu compris, voile sombre en haut). Comme Plume Foil, un seul bloc au milieu de la vidéo : grand logo blanc, slogan « 1 seule planche, 3 façons de voler », bouton « Configurer » et « À partir de 5 499 € TTC ». Le titre « Ne checkez plus la météo » (h1) reste dans la page pour Google mais n'est plus affiché. Le bloc central est posé dans layout/theme.liquid ; placé sans transform car l'animation « rise » du bloc l'écrase. Le 09/11 au soir, bloc central remonté un peu (marge du bas au lieu de celle du haut) et rendu blanc translucide (logo, slogan, bouton, prix) pour mieux voir la vidéo, voile sombre du milieu allégé ; logo encore plus translucide ensuite (opacité 0,38) ; bouton « Configurer » réduit de 20 % et sans icône. {%- endcomment -%}
 {%- comment -%} 09/11 au soir (demande de Cédric) : dans « Ils naviguent en Lite Foil », on ne montre plus les avis eux-mêmes sur l'accueil, seulement le résumé Avis Google (note, étoiles, « Lire tous les avis »), centré. {%- endcomment -%}
 {%- comment -%} 10/11 (demande de Cédric) : le logo du milieu de la vidéo est un dessin SVG (snippets/lf-logo-svg.liquid) aux couleurs d'origine, translucide, sans filtre : sur iPhone, l'image avec filtre faisait un carré gris. {%- endcomment -%}
-{%- comment -%} 10/11 (demande de Cédric), téléphone seulement : le logo du milieu de la vidéo est remonté juste sous le menu (1 cm sous le menu : un petit script mesure où finit le menu et place le logo 38 px plus bas ; remonté ensuite à 18 px sous le menu ; sans script, hauteur du menu lue dans --header-height) ; le slogan, le bouton « Configurer » et le prix sont descendus un peu. {%- endcomment -%}
+{%- comment -%} 10/11 (demande de Cédric), téléphone seulement : le logo du milieu de la vidéo est remonté juste sous le menu (1 cm sous le menu : un petit script mesure où finit le menu et place le logo 38 px plus bas ; remonté ensuite à 18 px sous le menu ; sans script, hauteur du menu lue dans --header-height) ; le slogan, le bouton « Configurer » et le prix sont descendus un peu, puis encore de 5 mm (le bloc est centré : +1 cm de marge en haut = 5 mm plus bas). {%- endcomment -%}
 {%- comment -%} 07/11 : la vidéo verticale du téléphone est choisie dans layout/theme.liquid (balises source). 10/11 : l'image d'attente du téléphone est aussi choisie là (balise picture) ; l'ancien script qui la changeait après coup ralentissait l'affichage et a été retiré. {%- endcomment -%}
 <style>
 #header-component[transparent]:not([data-sticky-state="active"]) .header__row{background-color:transparent !important}
@@ -27,7 +27,7 @@ body .lf .reviews .summary{position:static;width:auto;max-width:420px;margin:0 a
 #header-component .header__row--top .header__drawer{grid-area:leftA}
 #header-component .header__row--top .header-logo{justify-self:start}
 body .lf .hero{min-height:560px}body .lf .hero .shade{background:linear-gradient(180deg,rgba(0,0,0,.5) 0,rgba(0,0,0,.2) 140px,rgba(0,0,0,0) 240px),radial-gradient(ellipse 85% 40% at 50% 50%,rgba(0,0,0,.16),rgba(0,0,0,0))}
-body .lf .hero .cta.lf-center{padding:330px 16px 0;gap:14px}
+body .lf .hero .cta.lf-center{padding:calc(330px + 1cm) 16px 0;gap:14px}
 body .lf .hero .lf-hlogo{position:absolute;top:calc(var(--header-height,110px) + 18px);left:0;right:0;margin:0 auto;width:clamp(190px,30vh,240px)}
 body .lf .hero .lf-slogan{font-size:12px;letter-spacing:.14em;max-width:300px;line-height:1.5}}
 </style>
