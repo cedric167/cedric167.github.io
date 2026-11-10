@@ -1,0 +1,213 @@
+<!doctype html>
+<html
+  class="no-js{% if request.design_mode %} shopify-design-mode{% endif %}"
+  lang="{{ request.locale.iso_code }}"
+>
+  <head>
+    <meta name="color-scheme" content="light">
+    <style>:root{color-scheme:light !important}html,body{background:#ffffff}.header__row{background-color:#ffffff !important;color-scheme:light}</style>
+    {%- comment -%} 10/11 (demande de Cédric) : vitesse sur téléphone (PageSpeed mobile 65-69). L'image d'attente de la vidéo d'accueil est annoncée dès le début de la page (preload), au bon format : verticale et légère sur téléphone, horizontale sur ordinateur (voir lf_poster_new plus bas). {%- endcomment -%}
+    {%- if template.name == 'index' -%}
+      {%- assign lf_poster_base = 'https://litefoil.fr/cdn/shop/files/preview_images/e098ec1ef4e84f2094f6707f89383c5a.thumbnail.0000000000.jpg?v=1781518914' -%}
+      {%- assign lf_poster_mobile = 'https://litefoil.fr/cdn/shop/files/preview_images/aee3cfc89c7f458a8aafbad05aef3ba1.thumbnail.0000000000.jpg?v=1794074321' -%}
+      <link rel="preload" as="image" fetchpriority="high" href="{{ lf_poster_mobile }}&width=750" media="(max-width: 749px)">
+      <link rel="preload" as="image" fetchpriority="high" href="{{ lf_poster_base }}&width=1800" media="(min-width: 750px)">
+    {%- endif -%}
+    {%- comment -%} 09/11 (demande de Cédric) : logo du menu sans l'écriture « Lite Foil » au-dessus (on ne garde que les ailes), collé tout à gauche, réduit (83 × 41, soit -30 % sur 118 × 58). Style du bouton « Configurer » du menu (posé dans snippets/header-actions.liquid), caché sous 990 px. Barre de défilement du menu cachée (elle faisait une barre noire sous les liens sur téléphone ; le menu défile toujours au doigt). {%- endcomment -%}
+    {%- comment -%} 10/11 : le logo du menu et celui du milieu de la vidéo sont maintenant des dessins SVG (snippets/lf-logo-svg.liquid) : les iPhone gardaient un carré gris même avec le PNG intégré. {%- endcomment -%}
+    {%- comment -%} 09/11 au soir : sur certains iPhone, le logo envoyé par le CDN (format AVIF) perdait sa transparence (carré gris dans le menu, carré blanc au centre de la vidéo). Le logo est donc intégré en PNG (snippets/lf-logo-data.liquid) pour le menu et pour le centre de la vidéo. {%- endcomment -%}
+    {%- capture lf_logo_data -%}{% render 'lf-logo-data' %}{%- endcapture -%}
+    <style>#header-component *{scrollbar-width:none}#header-component *::-webkit-scrollbar{display:none;width:0;height:0}#header-component .header-logo__image{content:url("{{ lf_logo_data | strip }}");height:41px !important;width:83px !important;object-fit:cover;object-position:50% 100%}#header-component .header__row--top .header__columns{padding-inline-start:clamp(10px,1.5vw,24px)}.lf-hdr-cfg{display:inline-flex;align-items:center;align-self:center;gap:8px;margin-inline:8px 18px;padding:9px 18px;border:1.5px solid #0b0d10;border-radius:999px;background:#0b0d10;color:#fff !important;font-weight:600;font-size:14px;letter-spacing:.02em;line-height:1;text-decoration:none;white-space:nowrap;text-shadow:none !important;transition:background .2s,color .2s,border-color .2s}.lf-hdr-cfg svg{width:17px;height:17px;fill:currentColor}.lf-hdr-cfg:hover{background:#2a2f36;border-color:#2a2f36}#header-component[transparent]:not([data-sticky-state="active"]) .lf-hdr-cfg{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.85);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}#header-component[transparent]:not([data-sticky-state="active"]) .lf-hdr-cfg:hover{background:#fff;color:#0b0d10 !important}@media (max-width:989px){.lf-hdr-cfg{display:none}}</style>
+    {%- comment -%} 09/11 (demande de Cédric) : données pour Google (boutique de Rivesaltes sur l'accueil, fil d'Ariane ailleurs), voir snippets/lf-seo.liquid. {%- endcomment -%}
+    {% render 'lf-seo', mode: 'ld' %}
+    {%- if settings.favicon != blank -%}
+      <link
+        rel="icon"
+        type="image/png"
+        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+      >
+    {%- endif -%}
+
+    {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
+    <link
+      rel="expect"
+      href="#MainContent"
+      blocking="render"
+      id="view-transition-render-blocker"
+    >
+
+    {%- render 'meta-tags' -%}
+    {%- render 'stylesheets' -%}
+    {%- render 'fonts' -%}
+    {%- render 'scripts' -%}
+    {%- render 'theme-styles-variables' -%}
+    {%- render 'color-schemes' -%}
+
+    {% if request.design_mode %}
+      {%- render 'theme-editor' -%}
+    {% endif %}
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
+    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
+    <div id="header-group">
+      {%- comment -%} 10/11 : l'en-tête met un titre H1 caché « Lite Foil » sur l'accueil ; l'accueil a déjà son vrai H1 (snippets/lf-seo.liquid), on garde donc un seul H1 pour Google. {%- endcomment -%}
+      {%- if template.name == 'index' -%}
+        {%- capture lf_hdr -%}{% sections 'header-group' %}{%- endcapture -%}
+        {%- capture lf_hdr_h1 -%}<h1 class="visually-hidden">{{ shop.name }}</h1>{%- endcapture -%}
+        {%- capture lf_hdr_p -%}<p class="visually-hidden">{{ shop.name }}</p>{%- endcapture -%}
+        {{ lf_hdr | replace_first: lf_hdr_h1, lf_hdr_p }}
+      {%- else -%}
+        {% sections 'header-group' %}
+      {%- endif -%}
+    </div>
+
+    <script>
+      // Inline header height calculation to prevent layout shift
+      // Note: Updates in calculateHeaderGroupHeight() and updateTransparentHeaderOffset()utilities.js should be kept in sync with this function
+      (function setHeaderHeighCustomProperties() {
+        /*
+         * Header calculation functions for maintaining CSS variables
+         * Mimic calculateHeaderGroupHeight() in utilities.js
+         */
+        const header = document.querySelector('header-component');
+        const headerGroup = document.querySelector('#header-group');
+        const hasHeaderSection = headerGroup?.querySelector('.header-section');
+
+        if (!header || !headerGroup) return;
+
+        const headerHeight = header.offsetHeight;
+
+        // Calculate the total height of the header group
+        let headerGroupHeight = 0;
+        const children = headerGroup.children;
+        for (let i = 0; i < children.length; i++) {
+          const element = children[i];
+          if (element === header || !(element instanceof HTMLElement)) continue;
+          headerGroupHeight += element.offsetHeight;
+        }
+
+        // Check for transparent header special case
+        if (header.hasAttribute('transparent') && header.parentElement?.nextElementSibling) {
+          headerGroupHeight += headerHeight;
+        }
+
+        // Set CSS variables
+        document.body.style.setProperty('--header-height', `${headerHeight}px`);
+        document.body.style.setProperty('--header-group-height', `${headerGroupHeight}px`);
+
+        /**
+         * Updates CSS custom properties for transparent header offset calculation
+         * Mimic updateTransparentHeaderOffset() in utilities.js
+         */
+
+        if (!hasHeaderSection || !header?.hasAttribute('transparent')) {
+          document.body.style.setProperty('--transparent-header-offset-boolean', '0');
+          return;
+        }
+
+        const hasImmediateSection = hasHeaderSection.nextElementSibling?.classList.contains('shopify-section');
+
+        const shouldApplyOffset = !hasImmediateSection ? '1' : '0';
+        document.body.style.setProperty('--transparent-header-offset-boolean', shouldApplyOffset);
+      })();
+    </script>
+
+    <main
+      id="MainContent"
+      class="content-for-layout"
+      role="main"
+      data-page-transition-enabled="{{ settings.page_transition_enabled }}"
+      data-product-transition="{{ settings.transition_to_main_product }}"
+      data-template="{{ template }}"
+    >
+      {%- comment -%} 07/11 (demande de Cédric) : sur l'accueil, la vidéo choisit elle-même la version selon l'écran : verticale (drone) sur téléphone, horizontale sur ordinateur. Fait sans script pour marcher sur tous les téléphones. {%- endcomment -%}
+      {%- comment -%} 10/11 (demande de Cédric) : vitesse. Sur téléphone, la vidéo verticale passe en 480p (9 Mo au lieu de 25 Mo en 720p). La vidéo ne commence à se charger qu'une fois la page affichée (sources en data-src, petit script au chargement) ; en attendant, on voit l'image d'attente au bon format (balise picture). Sans script, l'image d'attente reste affichée. {%- endcomment -%}
+      {%- comment -%} 09/11 (demande de Cédric) : le bouton « Configurer mon eFoil » du bas de la vidéo est remplacé, au milieu de la vidéo, par le grand logo blanc, le slogan, le bouton « Configurer » (sans icône) et « À partir de 5 499 € TTC » (style dans sections/lf-accueil-video.liquid). {%- endcomment -%}
+      {%- comment -%} 09/11 (demande de Cédric) : accueil vidé, chaque bloc est rangé dans sa page du menu (eShop, Télécommandes, eFoil, Essais et location, Infos pratiques, L'appli Lite Foil) ; découpage et liste dans snippets/lf-parts.liquid. Titre H1 et court texte de référencement de l'accueil dans snippets/lf-seo.liquid. {%- endcomment -%}
+      {%- comment -%} 10/11 (demande de Cédric) : bloc de liens « Guides eFoil » en bas de la page eFoil 2027 et de l'eShop, et paragraphe « Vous venez de Toulouse ? » sur la page Agde-Montpellier (snippets/lf-guides.liquid). Sur la page eFoil 2027, titre H1 plus précis et texte « Le foil électrique français » pour viser « efoil » et « foil électrique » face à la page « eFoils » de PWR Foil. {%- endcomment -%}
+      {%- comment -%} 09/11 (demande de Cédric) : le « En savoir plus » du bloc « Apprendre le Lite Foil » mène à l'article « Apprendre en 6 étapes » (départ allongé, à genoux, debout) au lieu de la page Essais, avec la photo de Cédric (lf-apprendre.jpg). Le bloc « Essayer avant d'acheter » prend la photo du rider au Cap d'Agde (lf-essai-agde.jpg). Les deux photos sont dans Contenu → Fichiers. {%- endcomment -%}
+      {%- if template.name == 'index' -%}
+        {%- capture lf_vid_old -%} src="https://litefoil.fr/cdn/shop/videos/c/vp/e098ec1ef4e84f2094f6707f89383c5a/e098ec1ef4e84f2094f6707f89383c5a.HD-720p-4.5Mbps-86567816.mp4"></video>{%- endcapture -%}
+        {%- capture lf_vid_new -%}><source media="(max-width: 749px)" data-src="https://cdn.shopify.com/videos/c/vp/aee3cfc89c7f458a8aafbad05aef3ba1/aee3cfc89c7f458a8aafbad05aef3ba1.SD-480p-1.5Mbps-100398459.mp4" type="video/mp4"><source data-src="https://litefoil.fr/cdn/shop/videos/c/vp/e098ec1ef4e84f2094f6707f89383c5a/e098ec1ef4e84f2094f6707f89383c5a.HD-720p-4.5Mbps-86567816.mp4" type="video/mp4"></video><script>window.addEventListener('load',function(){var v=document.querySelector('.lf .hero video');if(!v)return;v.querySelectorAll('source[data-src]').forEach(function(s){s.src=s.getAttribute('data-src')});v.load();var p=v.play();if(p&&p.catch)p.catch(function(){})});</script>{%- endcapture -%}
+        {%- capture lf_video_tag_old -%}<video muted loop autoplay playsinline preload="metadata" poster="{%- endcapture -%}
+        {%- capture lf_video_tag_new -%}</picture><video muted loop autoplay playsinline preload="none" data-poster="{%- endcapture -%}
+        {%- capture lf_poster_new -%}<picture><source media="(max-width: 749px)" srcset="{{ lf_poster_mobile }}&width=750"><img class="poster" fetchpriority="high" width="1800" height="1013" sizes="100vw" srcset="{{ lf_poster_base }}&width=1200 1200w, {{ lf_poster_base }}&width=1800 1800w" src="{%- endcapture -%}
+        {%- if request.locale.iso_code == 'en' -%}
+          {%- assign lf_cfg_href = '/en/pages/configurateur' -%}{%- assign lf_cfg_old = 'Configure my eFoil' -%}{%- assign lf_cfg_txt = 'Configure' -%}{%- assign lf_from = 'From <b>€5,499 incl. VAT</b>' -%}{%- assign lf_slogan = 'One board, three ways to fly' -%}{%- assign lf_loc = '/en' -%}{%- assign lf_learn_txt = 'Learn more' -%}{%- assign lf_try_alt_old = 'Lite Foil in a harbour' -%}{%- assign lf_try_alt = 'Rider flying a Lite Foil at Cap d&#39;Agde' -%}{%- assign lf_learn_alt_old = 'Rider standing on a Lite Foil near the beach' -%}{%- assign lf_learn_alt = 'Rider flying a Lite Foil' -%}
+        {%- elsif request.locale.iso_code == 'es' -%}
+          {%- assign lf_cfg_href = '/es/pages/configurateur' -%}{%- assign lf_cfg_old = 'Configurar mi eFoil' -%}{%- assign lf_cfg_txt = 'Configurar' -%}{%- assign lf_from = 'Desde <b>5.499&nbsp;€ IVA incl.</b>' -%}{%- assign lf_slogan = 'Una tabla, tres formas de volar' -%}{%- assign lf_loc = '/es' -%}{%- assign lf_learn_txt = 'Más información' -%}{%- assign lf_try_alt_old = 'Lite Foil en un puerto' -%}{%- assign lf_try_alt = 'Rider volando en un Lite Foil en Cap d&#39;Agde' -%}{%- assign lf_learn_alt_old = 'Rider de pie sobre un Lite Foil cerca de la playa' -%}{%- assign lf_learn_alt = 'Rider volando en un Lite Foil' -%}
+        {%- else -%}
+          {%- assign lf_cfg_href = '/pages/configurateur' -%}{%- assign lf_cfg_old = 'Configurer mon eFoil' -%}{%- assign lf_cfg_txt = 'Configurer' -%}{%- assign lf_from = 'À partir de <b>5&nbsp;499&nbsp;€&nbsp;TTC</b>' -%}{%- assign lf_slogan = '1 seule planche, 3 façons de voler' -%}{%- assign lf_loc = '' -%}{%- assign lf_learn_txt = 'En savoir plus' -%}{%- assign lf_try_alt_old = 'Lite Foil dans un port' -%}{%- assign lf_try_alt = 'Rider en vol sur un Lite Foil au Cap d&#39;Agde' -%}{%- assign lf_learn_alt_old = 'Rider debout sur un Lite Foil près de la plage' -%}{%- assign lf_learn_alt = 'Rider en vol sur un Lite Foil' -%}
+        {%- endif -%}
+        {%- capture lf_cta_old -%}<div class="cta"><a class="btn solid" href="{{ lf_cfg_href }}">{{ lf_cfg_old }}</a></div>{%- endcapture -%}
+        {%- capture lf_cta_new -%}<div class="cta lf-center">{% render 'lf-logo-svg', class: 'lf-hlogo', id: 'hero' %}<div class="lf-slogan">{{ lf_slogan }}</div><a class="lf-cfg" href="{{ lf_cfg_href }}">{{ lf_cfg_txt }}</a><div class="lf-from">{{ lf_from }}</div></div>{%- endcapture -%}
+        {%- capture lf_learn_old -%}<a class="more" href="{{ lf_loc }}/pages/essais-location">{{ lf_learn_txt }}</a>{%- endcapture -%}
+        {%- capture lf_learn_new -%}<a class="more" href="{{ lf_loc }}/blogs/infos/apprendre-efoil-debutant">{{ lf_learn_txt }}</a>{%- endcapture -%}
+        {%- capture lf_learn_img_old -%}<img src="{{ 'lf-photo_38.jpg' | asset_url }}" alt="{{ lf_learn_alt_old }}">{%- endcapture -%}
+        {%- capture lf_learn_img_new -%}<img src="{{ 'lf-apprendre.jpg' | file_url }}" alt="{{ lf_learn_alt }}" style="object-position:66% 50%" loading="lazy">{%- endcapture -%}
+        {%- capture lf_try_old -%}<img src="{{ 'lf-photo_26.jpg' | asset_url }}" alt="{{ lf_try_alt_old }}">{%- endcapture -%}
+        {%- capture lf_try_new -%}<img src="{{ 'lf-essai-agde.jpg' | file_url }}" alt="{{ lf_try_alt }}" style="object-position:35% 50%" loading="lazy">{%- endcapture -%}
+        {%- assign lf_home = content_for_layout | replace_first: lf_vid_old, lf_vid_new | replace_first: '<img class="poster" src="', lf_poster_new | replace_first: lf_video_tag_old, lf_video_tag_new | replace_first: lf_cta_old, lf_cta_new | replace_first: lf_learn_old, lf_learn_new | replace_first: lf_learn_img_old, lf_learn_img_new | replace_first: lf_try_old, lf_try_new -%}
+        {%- capture lf_home_seo -%}{% render 'lf-seo', mode: 'home', html: lf_home %}{%- endcapture -%}
+        {% render 'lf-parts', html: lf_home_seo, hide: 'modeles,comparer,telecommande,pratiques,innovation,histoire,quote,avis,app,community,journal,faq,social,appbar' %}
+      {%- elsif template.suffix == 'eshop' -%}
+        {%- comment -%} 09/11 (demande de Cédric) : sur la page eShop, on retire la carte « Lite Foil Ultra » (déjà dans le menu eFoil) ; mâts, planches et accessoires restent. Titre H1 caché pour Google (la page n'en avait pas). {%- endcomment -%}
+        {%- case request.locale.iso_code -%}{%- when 'en' -%}<h1 class="visually-hidden">Lite Foil eShop: eFoil boards, masts, batteries, wings and accessories</h1>{%- when 'es' -%}<h1 class="visually-hidden">eShop Lite Foil: tablas, mástiles, baterías, alas y accesorios de eFoil</h1>{%- else -%}<h1 class="visually-hidden">eShop Lite Foil : planches, mâts, batteries, ailes et accessoires eFoil</h1>{%- endcase -%}
+        {%- assign lf_cards = content_for_layout | split: '<article class="card">' -%}
+        {%- capture lf_shop -%}{%- for lf_c in lf_cards -%}{%- if forloop.first -%}{{ lf_c }}{%- elsif forloop.last == false and lf_c contains 'm=ultra' -%}{%- else -%}<article class="card">{{ lf_c }}{%- endif -%}{%- endfor -%}{%- endcapture -%}
+        {% render 'lf-parts', html: lf_shop, parts: 'modeles,comparer' %}
+        {% render 'lf-guides', mode: 'links' %}
+      {%- elsif template.suffix == 'telecommandes' -%}
+        {% render 'lf-parts', html: content_for_layout, parts: 'telecommande' %}
+      {%- elsif template.name == 'collection' and template.suffix == 'efoil' -%}
+        {%- capture lf_ch1_old -%}<h1>{{ collection.title }}</h1>{%- endcapture -%}
+        {%- case request.locale.iso_code -%}
+          {%- when 'en' -%}{%- capture lf_ch1_new -%}<h1>{{ collection.title }}: the French electric hydrofoil</h1>{%- endcapture -%}
+          {%- when 'es' -%}{%- capture lf_ch1_new -%}<h1>{{ collection.title }}: el foil eléctrico francés</h1>{%- endcapture -%}
+          {%- else -%}{%- capture lf_ch1_new -%}<h1>{{ collection.title }} : le foil électrique français</h1>{%- endcapture -%}
+        {%- endcase -%}
+        {%- assign lf_efoil = content_for_layout | replace_first: lf_ch1_old, lf_ch1_new -%}
+        {% render 'lf-parts', html: lf_efoil, parts: 'pratiques,innovation,quote,avis' %}
+        {% render 'lf-guides', mode: 'efoil' %}
+        {% render 'lf-guides', mode: 'links' %}
+      {%- elsif template.name == 'page' and template.suffix == 'essais' -%}
+        {% render 'lf-parts', html: content_for_layout, parts: 'histoire' %}
+      {%- elsif template.name == 'page' and template.suffix == 'guide' -%}
+        {% render 'lf-parts', html: content_for_layout, parts: 'journal,faq' %}
+      {%- elsif template.name == 'page' and template.suffix == 'appli' -%}
+        {% render 'lf-parts', html: content_for_layout, parts: 'app,community,social' %}
+      {%- elsif template.name == 'page' and page.handle == 'efoil-agde-montpellier-herault' -%}
+        {{ content_for_layout }}
+        {% render 'lf-guides', mode: 'toulouse' %}
+      {%- elsif template.name == 'product' -%}
+        {%- comment -%} 10/11 : deux textes du thème non traduits en français et en espagnol dans la barre d'achat qui reste en bas des fiches produits (« Translation missing », lu par Google et les lecteurs d'écran). {%- endcomment -%}
+        {%- assign lf_tm = 'Translation missing: ' | append: request.locale.iso_code | append: '.products.product.' -%}
+        {%- case request.locale.iso_code -%}
+          {%- when 'es' -%}{%- assign lf_sticky = 'Añadir al carrito' -%}
+          {%- when 'en' -%}{%- assign lf_sticky = 'Add to cart' -%}
+          {%- else -%}{%- assign lf_sticky = 'Ajouter au panier' -%}
+        {%- endcase -%}
+        {%- assign lf_tm_title = lf_tm | append: 'default_title' -%}{%- assign lf_tm_sticky = lf_tm | append: 'sticky_add_to_cart' -%}
+        {{ content_for_layout | replace: lf_tm_title, 'Default Title' | replace: lf_tm_sticky, lf_sticky }}
+      {%- else -%}
+        {{ content_for_layout }}
+      {%- endif -%}
+    </main>
+
+    {% render 'lf-made-in-france' %}
+    {% sections 'footer-group' %}
+
+    {% render 'search-modal' %}
+
+    {% if settings.quick_add or settings.mobile_quick_add %}
+      {% render 'quick-add-modal' %}
+    {% endif %}
+
+    {%- comment -%} 10/11 (demande de Cédric) : bouton WhatsApp à la place de la bulle « Chat » (snippets/lf-whatsapp.liquid). {%- endcomment -%}
+    {% render 'lf-whatsapp' %}
+  </body>
+</html>
+
